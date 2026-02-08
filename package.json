@@ -1,0 +1,38 @@
+{
+  "name": "ecommerce-shop-be",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx --watch src/index.ts",
+    "start": "node dist/src/index.js",
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Kristijan Jovanovski",
+  "license": "MIT",
+  "imports": {
+    "#*": "./src/*"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.5",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.2.2",
+    "eslint": "^9.39.2",
+    "eslint-plugin-perfectionist": "^5.5.0",
+    "prettier": "^3.8.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0"
+  }
+}
