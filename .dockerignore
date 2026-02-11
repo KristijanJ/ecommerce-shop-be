@@ -1,0 +1,68 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build output
+dist
+*.tsbuildinfo
+
+# Generated files
+generated
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Documentation
+README.md
+LICENSE
+*.md
+
+# Test files
+test
+tests
+*.test.ts
+*.spec.ts
+coverage
+.nyc_output
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.circleci
+
+# Linting and formatting
+.eslintrc*
+.eslintignore
+.prettierrc*
+.prettierignore
+eslint.config.js
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Kubernetes
+k8s
+kubernetes
+*.yaml
+*.yml
+
+# Misc
+.editorconfig
