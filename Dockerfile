@@ -25,6 +25,7 @@ COPY package*.json ./
 
 RUN npm ci --omit=dev && npm cache clean --force
 
+COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./
 
 # Switch to non-root user
