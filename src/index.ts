@@ -7,7 +7,6 @@ const port = "3000";
 app.use(express.json());
 
 app.get("/health", (req, res) => {
-  console.log("Response sent");
   return res.json({ data: "OK" }).status(200);
 });
 
