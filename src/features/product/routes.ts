@@ -1,14 +1,9 @@
 import { Router } from "express";
-import { prisma } from "../../lib/prisma.js";
+import { ProductController } from "./controller.js";
 
 const router = Router();
 
-router.get("/", async (req, res) => {
-  const products = await prisma.product.findMany({
-    take: 20, // TODO: implement pagination
-  });
-
-  return res.json({ data: products }).status(200);
-});
+router.get("/", ProductController.getAllProducts);
+router.get("/:id", ProductController.getProductById);
 
 export default router;
