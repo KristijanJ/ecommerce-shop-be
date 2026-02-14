@@ -13,7 +13,20 @@ datasource db {
   provider = "postgresql"
 }
 
-model TestItem {
-  id   Int    @id @default(autoincrement())
-  text String
+model Product {
+  id                Int             @id @default(autoincrement())
+  title             String
+  price             Float
+  description       String
+  image             String
+  ratingRate        Float
+  ratingCount       Int
+  category          ProductCategory @relation(fields: [productCategoryId], references: [id])
+  productCategoryId Int
+}
+
+model ProductCategory {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
 }
