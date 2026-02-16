@@ -2,39 +2,39 @@ import { prisma } from "../../lib/prisma.js";
 import { IUser, IUserDto } from "./schemas.js";
 
 export class UserRepository {
-  static async GetUserById(id: number) {
+  static async GetUserById(id: number, withPassword: boolean = false): Promise<IUserDto | null> {
     try {
-      const user = await prisma.user.findFirst({ where: { id } });
+      const user = await prisma.user.findFirst({
+        where: { id },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          password: withPassword,
+        },
+      });
 
-      if (!user) return null;
-
-      const userValue: IUserDto = {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      };
-
-      return userValue;
+      return user;
     } catch (error) {
       throw error;
     }
   }
 
-  static async GetUserByEmail(email: string) {
+  static async GetUserByEmail(email: string, withPassword: boolean = false): Promise<IUserDto | null> {
     try {
-      const user = await prisma.user.findFirst({ where: { email } });
+      const user = await prisma.user.findFirst({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          password: withPassword,
+        },
+      });
 
-      if (!user) return null;
-
-      const userValue: IUserDto = {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      };
-
-      return userValue;
+      return user;
     } catch (error) {
       throw error;
     }

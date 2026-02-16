@@ -11,7 +11,13 @@ export class AuthController {
       const password = await AuthService.hashPassword(body.password);
 
       // WIP
-      const user = await UserService.GetUser({ email: req.body.email });
+      const user = await UserService.GetUser({ email: req.body.email, withPassword: true });
+
+      if (!user) {
+        return res.status(404).json({
+          data: null,
+        });
+      }
 
       return res.status(200).json({
         data: user,

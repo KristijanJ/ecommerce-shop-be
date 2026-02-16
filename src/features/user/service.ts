@@ -4,18 +4,19 @@ import { IUser } from "./schemas.js";
 interface IGetUser {
   id?: number;
   email?: string;
+  withPassword?: boolean;
 }
 
 export class UserService {
-  static async GetUser({ id, email }: IGetUser) {
+  static async GetUser({ id, email, withPassword = false }: IGetUser) {
     try {
       if (id) {
-        const user = await UserRepository.GetUserById(id);
+        const user = await UserRepository.GetUserById(id, withPassword);
         return user;
       }
 
       if (email) {
-        const user = await UserRepository.GetUserByEmail(email);
+        const user = await UserRepository.GetUserByEmail(email, withPassword);
         return user;
       }
 
