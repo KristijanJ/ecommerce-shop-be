@@ -20,7 +20,8 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     email: payload.email,
     firstName: payload.firstName,
     lastName: payload.lastName,
-  }
+    roles: payload.roles,
+  };
 
   next();
 };
