@@ -38,8 +38,17 @@ npm start
 ## Database Commands
 
 ```bash
-# Create a new migration
+# Create a new migration (and apply it in development)
 npx prisma migrate dev --name <migration_name>
+
+# Create migration only (without applying it)
+npx prisma migrate dev --create-only --name <migration_name>
+
+# Apply pending migrations (production)
+npx prisma migrate deploy
+
+# Apply pending migrations (development)
+npx prisma migrate dev
 
 # Generate Prisma Client (after schema changes)
 npx prisma generate
