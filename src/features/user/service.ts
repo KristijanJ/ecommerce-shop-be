@@ -28,6 +28,11 @@ export class UserService {
 
   static async CreateUser(newUser: IUser) {
     try {
+      const existingUser = await this.GetUser({ email: newUser.email });
+      if (existingUser) {
+        throw new Error("user_with_email_exists");
+      }
+
       const user = UserRepository.SaveUser(newUser);
       return user;
     } catch (error) {

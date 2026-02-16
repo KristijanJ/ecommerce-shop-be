@@ -10,7 +10,6 @@ export class AuthController {
       const body = LoginRequestSchema.parse(req.body);
       const password = await AuthService.hashPassword(body.password);
 
-      // WIP
       const user = await UserService.GetUser({ email: req.body.email, withPassword: true });
 
       if (!user) {
@@ -19,8 +18,22 @@ export class AuthController {
         });
       }
 
+      const isPassValid = await AuthService.verifyPassword(req.body.password, user.password!);
+      if (!isPassValid) {
+        return res.status(401).json({
+          data: null,
+        });
+      }
+
+      const token = await AuthService.createJwt({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+
       return res.status(200).json({
-        data: user,
+        token: token,
       });
     } catch (error) {
       if (error instanceof ZodError) {
@@ -42,14 +55,28 @@ export class AuthController {
         lastName: body.lastName,
       });
 
+      const token = await AuthService.createJwt({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+
       return res.status(200).json({
-        data: user,
+        token: token,
       });
     } catch (error) {
       if (error instanceof ZodError) {
         return res.status(400).json({ error: JSON.parse(error.message) });
       }
-      return res.status(500).json({ error: "something went wrong" });
+      if (error instanceof Error) {
+        if (error.message === "user_with_email_exists") {
+          return res.status(400).json({ error: "A user with this email already exists." });
+        } else {
+          return res.status(500).json({ error: "Something went wrong." });
+        }
+      }
+      return res.status(500).json({ error: "Something went wrong." });
     }
   }
 

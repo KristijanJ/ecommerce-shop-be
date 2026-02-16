@@ -3,6 +3,9 @@ import { prisma } from "../../lib/prisma.js";
 
 export class ProductController {
   static async getAllProducts(req: Request, res: Response) {
+    // const userId = req.user?.id;
+    // console.log("userId", userId);
+
     const products = await prisma.product.findMany({
       take: 20, // TODO: implement pagination
       include: {
