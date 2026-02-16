@@ -17,4 +17,5 @@ export interface IUserDto {
   firstName: string;
   lastName: string;
   password?: string;
+  roles: string[];
 }

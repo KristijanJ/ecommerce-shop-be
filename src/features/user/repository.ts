@@ -12,10 +12,30 @@ export class UserRepository {
           firstName: true,
           lastName: true,
           password: withPassword,
+          userRoles: {
+            select: {
+              role: {
+                select: {
+                  id: true,
+                  name: true,
+                  description: true,
+                },
+              },
+            },
+          },
         },
       });
 
-      return user;
+      if (!user) return null;
+
+      return {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        password: user.password,
+        roles: user.userRoles.map((ur) => ur.role.name),
+      };
     } catch (error) {
       throw error;
     }
@@ -31,10 +51,30 @@ export class UserRepository {
           firstName: true,
           lastName: true,
           password: withPassword,
+          userRoles: {
+            select: {
+              role: {
+                select: {
+                  id: true,
+                  name: true,
+                  description: true,
+                },
+              },
+            },
+          },
         },
       });
 
-      return user;
+      if (!user) return null;
+
+      return {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        password: user.password,
+        roles: user.userRoles.map((ur) => ur.role.name),
+      };
     } catch (error) {
       throw error;
     }
@@ -60,6 +100,7 @@ export class UserRepository {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        roles: [],
       };
 
       return userValue;

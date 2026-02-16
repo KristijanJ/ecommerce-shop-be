@@ -24,7 +24,7 @@ export class AuthService {
   static async createJwt(user: IUserDto) {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
-    const token = await new SignJWT({ sub: "jovanovski", role: "user", ...user })
+    const token = await new SignJWT({ sub: "jovanovski", ...user })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
       .setExpirationTime("1d")

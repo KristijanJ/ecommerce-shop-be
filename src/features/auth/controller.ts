@@ -30,6 +30,7 @@ export class AuthController {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        roles: user.roles,
       });
 
       return res.status(200).json({
@@ -60,6 +61,7 @@ export class AuthController {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        roles: user.roles,
       });
 
       return res.status(200).json({
