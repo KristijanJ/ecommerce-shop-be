@@ -5,7 +5,7 @@ export class UserRepository {
   static async GetUserById(id: number, withPassword: boolean = false): Promise<IUserDto | null> {
     try {
       const user = await prisma.user.findFirst({
-        where: { id },
+        where: { id, isActive: true },
         select: {
           id: true,
           email: true,
@@ -44,7 +44,7 @@ export class UserRepository {
   static async GetUserByEmail(email: string, withPassword: boolean = false): Promise<IUserDto | null> {
     try {
       const user = await prisma.user.findFirst({
-        where: { email },
+        where: { email, isActive: true },
         select: {
           id: true,
           email: true,

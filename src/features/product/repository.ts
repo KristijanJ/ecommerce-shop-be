@@ -6,6 +6,7 @@ export class ProductRepository {
     try {
       const productsResponse = await prisma.product.findMany({
         take: 20, // TODO: implement pagination
+        where: { isActive: true },
         select: {
           id: true,
           title: true,
@@ -38,7 +39,7 @@ export class ProductRepository {
   static async FetchProductById(id: number): Promise<IProductDto | null> {
     try {
       const product = await prisma.product.findFirst({
-        where: { id },
+        where: { id, isActive: true },
         select: {
           id: true,
           title: true,
@@ -71,7 +72,7 @@ export class ProductRepository {
   static async FetchProductsByOwner(ownerId: number): Promise<IProductDto[]> {
     try {
       return await prisma.product.findMany({
-        where: { ownerId },
+        where: { ownerId, isActive: true },
         select: {
           id: true,
           title: true,

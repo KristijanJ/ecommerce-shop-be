@@ -4,7 +4,7 @@ export class RBACRepository {
   static async FetchRolePermissions(roles: string[]) {
     try {
       const rolePermissions = await prisma.role.findMany({
-        where: { name: { in: roles } },
+        where: { name: { in: roles }, isActive: true },
         include: {
           rolePermissions: {
             include: {
