@@ -7,6 +7,8 @@ const router = Router();
 
 router.get("/", ProductController.GetAllProducts);
 
+router.get("/mine", authenticateToken, ProductController.GetMyProducts);
+
 router.get("/:id", ProductController.GetProductById);
 
 router.post("/", authenticateToken, loadPermissions, ProductController.CreateProduct);

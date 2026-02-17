@@ -66,6 +66,33 @@ export class ProductRepository {
     }
   }
 
+  static async FetchProductsByOwner(ownerId: number): Promise<IProductDto[]> {
+    try {
+      return await prisma.product.findMany({
+        where: { ownerId },
+        select: {
+          id: true,
+          title: true,
+          price: true,
+          description: true,
+          image: true,
+          ratingRate: true,
+          ratingCount: true,
+          productCategoryId: false,
+          ownerId: false,
+          category: {
+            select: { id: true, name: true },
+          },
+          owner: {
+            select: { id: true, email: true, firstName: true, lastName: true },
+          },
+        },
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async SaveProduct(newProduct: IProduct): Promise<IProduct | null> {
     try {
       let product;

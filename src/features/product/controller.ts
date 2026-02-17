@@ -34,6 +34,22 @@ export class ProductController {
     }
   }
 
+  static async GetMyProducts(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const products = await ProductRepository.FetchProductsByOwner(userId);
+      return res.status(200).json({ data: products });
+    } catch (error) {
+      console.log("get my products failed", error);
+      return res.status(500).json({ error: "Failed to fetch products" });
+    }
+  }
+
   static async CreateProduct(req: Request, res: Response) {
     try {
       const userId = req.user?.id;
