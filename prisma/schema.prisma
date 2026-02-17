@@ -22,10 +22,12 @@ model Product {
   ratingRate        Float
   ratingCount       Int
   stock             Int             @default(0)
+  isActive          Boolean         @default(true)
   category          ProductCategory @relation(fields: [productCategoryId], references: [id])
   productCategoryId Int
   owner             User            @relation(fields: [ownerId], references: [id])
   ownerId           Int
+  orderItems        OrderItem[]
 
   @@index([productCategoryId])
   @@index([ownerId, productCategoryId])
@@ -34,23 +36,29 @@ model Product {
 model ProductCategory {
   id       Int       @id @default(autoincrement())
   name     String
+  isActive Boolean   @default(true)
   products Product[]
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
-  email     String     @unique
-  password  String
-  firstName String
-  lastName  String
-  userRoles UserRole[]
-  products  Product[]
+  id             Int        @id @default(autoincrement())
+  email          String     @unique
+  password       String
+  firstName      String
+  lastName       String
+  isActive       Boolean    @default(true)
+  userRoles      UserRole[]
+  products       Product[]
+  ordersAsBuyer  Order[]    @relation("OrderBuyer")
+  ordersAsSeller Order[]    @relation("OrderSeller")
+  purchases      Purchase[]
 }
 
 model Role {
   id              Int              @id @default(autoincrement())
   name            String           @unique
   description     String?
+  isActive        Boolean          @default(true)
   userRoles       UserRole[]
   rolePermissions RolePermission[]
 }
@@ -59,6 +67,7 @@ model Permission {
   id              Int              @id @default(autoincrement())
   name            String           @unique
   description     String?
+  isActive        Boolean          @default(true)
   rolePermissions RolePermission[]
 }
 
@@ -78,4 +87,65 @@ model RolePermission {
   permissionId Int
 
   @@id([roleId, permissionId])
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  buyer      User        @relation("OrderBuyer", fields: [buyerId], references: [id])
+  buyerId    Int
+  seller     User        @relation("OrderSeller", fields: [sellerId], references: [id])
+  sellerId   Int
+  orderItems OrderItem[]
+  purchase   Purchase?   @relation(fields: [purchaseId], references: [id])
+  purchaseId Int?
+  status     OrderStatus @default(PENDING)
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id              Int     @id @default(autoincrement())
+  order           Order   @relation(fields: [orderId], references: [id])
+  orderId         Int
+  product         Product @relation(fields: [productId], references: [id])
+  productId       Int
+  quantity        Int
+  priceAtPurchase Int
+}
+
+model Purchase {
+  id       Int            @id @default(autoincrement())
+  orders   Order[]
+  buyer    User           @relation(fields: [buyerId], references: [id])
+  buyerId  Int
+  status   PurchaseStatus @default(PENDING)
+  payments Payment[]
+}
+
+enum PurchaseStatus {
+  PENDING
+  PAID
+  CANCELLED
+  REFUNDED
+}
+
+model Payment {
+  id         Int           @id @default(autoincrement())
+  status     PaymentStatus @default(PENDING)
+  amount     Int
+  purchase   Purchase      @relation(fields: [purchaseId], references: [id])
+  purchaseId Int
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
 }
