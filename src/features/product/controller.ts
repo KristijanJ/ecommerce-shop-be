@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { prisma } from "../../lib/prisma.js";
 import { ProductRepository } from "./repository.js";
 import { IProduct, ProductSchema } from "./schemas.js";
 import { ZodError } from "zod";

@@ -124,6 +124,7 @@ model Purchase {
   orders   Order[]
   buyer    User           @relation(fields: [buyerId], references: [id])
   buyerId  Int
+  amount   Int
   status   PurchaseStatus @default(PENDING)
   payments Payment[]
 }
