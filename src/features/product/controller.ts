@@ -113,6 +113,7 @@ export class ProductController {
         image: req.body.image ?? existingProduct.image,
         ratingRate: req.body.ratingRate ?? existingProduct.ratingRate,
         ratingCount: req.body.ratingCount ?? existingProduct.ratingCount,
+        stock: req.body.stock ?? existingProduct.stock,
         ownerId: existingProduct.owner.id,
         productCategoryId: req.body.productCategoryId ?? existingProduct.category.id,
       });
