@@ -6,6 +6,7 @@ import productRouter from "./features/product/routes.js";
 import authRouter from "./features/auth/routes.js";
 import categoryRouter from "./features/category/routes.js";
 import purchaseRouter from "./features/purchase/routes.js";
+import paymentRouter from "./features/payment/routes.js";
 
 const app: Application = express();
 const port = process.env.PORT || "3000";
@@ -21,6 +22,7 @@ app.use("/auth", authRouter);
 app.use("/products", productRouter);
 app.use("/categories", categoryRouter);
 app.use("/purchases", purchaseRouter);
+app.use("/payments", paymentRouter);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
