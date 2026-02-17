@@ -7,4 +7,6 @@ const router = Router();
 
 router.get("/", authenticateToken, loadPermissions, PurchaseController.GetAllPurchasesForBuyer);
 
+router.post("/", authenticateToken, loadPermissions, PurchaseController.MakeNewPurchase);
+
 export default router;
