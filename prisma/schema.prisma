@@ -21,6 +21,7 @@ model Product {
   image             String
   ratingRate        Float
   ratingCount       Int
+  stock             Int             @default(0)
   category          ProductCategory @relation(fields: [productCategoryId], references: [id])
   productCategoryId Int
   owner             User            @relation(fields: [ownerId], references: [id])

@@ -14,6 +14,7 @@ export class ProductRepository {
           image: true,
           ratingRate: true,
           ratingCount: true,
+          stock: true,
           productCategoryId: false,
           ownerId: false,
           category: {
@@ -46,6 +47,7 @@ export class ProductRepository {
           image: true,
           ratingRate: true,
           ratingCount: true,
+          stock: true,
           productCategoryId: false,
           ownerId: false,
           category: {
@@ -78,6 +80,7 @@ export class ProductRepository {
           image: true,
           ratingRate: true,
           ratingCount: true,
+          stock: true,
           productCategoryId: false,
           ownerId: false,
           category: {
