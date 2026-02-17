@@ -4,6 +4,7 @@ import express, { Application } from "express";
 
 import productRouter from "./features/product/routes.js";
 import authRouter from "./features/auth/routes.js";
+import categoryRouter from "./features/category/routes.js";
 
 const app: Application = express();
 const port = process.env.PORT || "3000";
@@ -17,6 +18,7 @@ app.get("/health", (req, res) => {
 
 app.use("/auth", authRouter);
 app.use("/products", productRouter);
+app.use("/categories", categoryRouter);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
