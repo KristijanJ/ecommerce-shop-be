@@ -82,17 +82,31 @@ export class UserRepository {
 
   static async SaveUser(newUser: IUser) {
     try {
+      const { role, ...userData } = newUser;
+
       let user = null;
 
-      if (newUser.id) {
+      if (userData.id) {
         user = await prisma.user.update({
-          where: { id: newUser.id },
-          data: newUser,
+          where: { id: userData.id },
+          data: userData,
         });
       } else {
         user = await prisma.user.create({
-          data: newUser,
+          data: userData,
         });
+      }
+
+      if (role) {
+        const roleRecord = await prisma.role.findFirst({
+          where: { name: role, isActive: true },
+        });
+
+        if (roleRecord) {
+          await prisma.userRole.create({
+            data: { userId: user.id, roleId: roleRecord.id },
+          });
+        }
       }
 
       const userValue: IUserDto = {
@@ -100,7 +114,7 @@ export class UserRepository {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        roles: [],
+        roles: role ? [role] : [],
       };
 
       return userValue;

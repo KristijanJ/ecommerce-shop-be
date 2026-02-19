@@ -33,7 +33,7 @@ export class UserService {
         throw new Error("user_with_email_exists");
       }
 
-      const user = UserRepository.SaveUser(newUser);
+      const user = await UserRepository.SaveUser(newUser);
       return user;
     } catch (error) {
       throw error;

@@ -122,6 +122,14 @@ export class PurchaseRepository {
         select: {
           id: true,
           amount: true,
+          status: true,
+          payments: {
+            select: {
+              id: true,
+              status: true,
+              amount: true,
+            },
+          },
           orders: {
             select: {
               id: true,
@@ -131,11 +139,18 @@ export class PurchaseRepository {
                   id: true,
                   priceAtPurchase: true,
                   quantity: true,
+                  product: {
+                    select: {
+                      title: true,
+                      image: true,
+                    },
+                  },
                 },
               },
             },
           },
         },
+        orderBy: { id: "desc" },
       });
       return purchases;
     } catch (error) {

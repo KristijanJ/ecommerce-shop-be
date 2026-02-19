@@ -54,6 +54,7 @@ export class AuthController {
         password: password,
         firstName: body.firstName,
         lastName: body.lastName,
+        role: body.role,
       });
 
       const token = await AuthService.createJwt({

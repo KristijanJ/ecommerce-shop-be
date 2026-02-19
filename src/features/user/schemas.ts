@@ -9,6 +9,7 @@ export const UserSchema = z.object({
 
 export interface IUser extends z.infer<typeof UserSchema> {
   id?: number;
+  role?: string;
 }
 
 export interface IUserDto {

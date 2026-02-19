@@ -39,7 +39,7 @@ export class PurchaseController {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      const purchases = PurchaseRepository.FetchPurchasesForBuyer(userId);
+      const purchases = await PurchaseRepository.FetchPurchasesForBuyer(userId);
       return res.status(200).json({ data: purchases });
     } catch (error) {
       console.log("get all products failed", error);
