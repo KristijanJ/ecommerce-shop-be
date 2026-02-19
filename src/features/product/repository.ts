@@ -2,11 +2,17 @@ import { prisma } from "../../lib/prisma.js";
 import { IProduct, IProductDto } from "./schemas.js";
 
 export class ProductRepository {
-  static async FetchProducts(): Promise<IProductDto[]> {
+  static async FetchProducts(options?: { categoryId?: number; search?: string }): Promise<IProductDto[]> {
     try {
       const productsResponse = await prisma.product.findMany({
         take: 20, // TODO: implement pagination
-        where: { isActive: true },
+        where: {
+          isActive: true,
+          ...(options?.categoryId && { productCategoryId: options.categoryId }),
+          ...(options?.search && {
+            title: { contains: options.search, mode: "insensitive" },
+          }),
+        },
         select: {
           id: true,
           title: true,

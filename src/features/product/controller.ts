@@ -7,7 +7,13 @@ import { RBAC } from "../rbac/service.js";
 export class ProductController {
   static async GetAllProducts(req: Request, res: Response) {
     try {
-      const products = await ProductRepository.FetchProducts();
+      const categoryId = req.query.category ? parseInt(req.query.category as string, 10) : undefined;
+      const search = req.query.search as string | undefined;
+
+      const products = await ProductRepository.FetchProducts({
+        categoryId: categoryId && !isNaN(categoryId) ? categoryId : undefined,
+        search,
+      });
 
       return res.status(200).json({ data: products });
     } catch (error) {
