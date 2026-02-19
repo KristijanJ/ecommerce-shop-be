@@ -4,6 +4,33 @@ import { PurchaseRepository } from "./repository.js";
 import { CreatePurchaseSchema } from "./schemas.js";
 
 export class PurchaseController {
+  static async GetPurchaseById(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const purchaseId = parseInt(req.params.id as string, 10);
+
+      if (isNaN(purchaseId)) {
+        return res.status(400).json({ error: "Invalid purchase ID." });
+      }
+
+      const purchase = await PurchaseRepository.FetchPurchaseById(purchaseId, userId);
+
+      if (!purchase) {
+        return res.status(404).json({ error: "Purchase not found." });
+      }
+
+      return res.status(200).json({ data: purchase });
+    } catch (error) {
+      console.log("get purchase by id failed", error);
+      return res.status(500).json({});
+    }
+  }
+
   static async GetAllPurchasesForBuyer(req: Request, res: Response) {
     try {
       const userId = req.user?.id;

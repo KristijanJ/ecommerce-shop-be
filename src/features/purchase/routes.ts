@@ -6,6 +6,7 @@ import { loadPermissions } from "../../middleware/requirePermission.js";
 const router = Router();
 
 router.get("/", authenticateToken, loadPermissions, PurchaseController.GetAllPurchasesForBuyer);
+router.get("/:id", authenticateToken, loadPermissions, PurchaseController.GetPurchaseById);
 
 router.post("/", authenticateToken, loadPermissions, PurchaseController.MakeNewPurchase);
 

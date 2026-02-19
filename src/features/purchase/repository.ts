@@ -89,6 +89,32 @@ export class PurchaseRepository {
     });
   }
 
+  static async FetchPurchaseById(purchaseId: number, buyerId: number) {
+    const purchase = await prisma.purchase.findFirst({
+      where: { id: purchaseId, buyerId },
+      select: {
+        id: true,
+        amount: true,
+        status: true,
+        orders: {
+          select: {
+            id: true,
+            status: true,
+            orderItems: {
+              select: {
+                id: true,
+                productId: true,
+                quantity: true,
+                priceAtPurchase: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return purchase;
+  }
+
   static async FetchPurchasesForBuyer(buyerId: number) {
     try {
       const purchases = await prisma.purchase.findMany({
