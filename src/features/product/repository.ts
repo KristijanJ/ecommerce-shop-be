@@ -8,6 +8,7 @@ export class ProductRepository {
         take: 20, // TODO: implement pagination
         where: {
           isActive: true,
+          stock: { gt: 0 },
           ...(options?.categoryId && { productCategoryId: options.categoryId }),
           ...(options?.search && {
             title: { contains: options.search, mode: "insensitive" },
@@ -119,6 +120,17 @@ export class ProductRepository {
       }
 
       return product;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async SoftDeleteProduct(id: number): Promise<void> {
+    try {
+      await prisma.product.update({
+        where: { id },
+        data: { isActive: false },
+      });
     } catch (error) {
       throw error;
     }

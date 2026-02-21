@@ -15,4 +15,6 @@ router.post("/", authenticateToken, loadPermissions, ProductController.CreatePro
 
 router.put("/:id", authenticateToken, loadPermissions, ProductController.EditProduct);
 
+router.delete("/:id", authenticateToken, loadPermissions, ProductController.DeleteProduct);
+
 export default router;

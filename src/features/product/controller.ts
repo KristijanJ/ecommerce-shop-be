@@ -139,4 +139,37 @@ export class ProductController {
       return res.status(500).json({ error: "Something went wrong" });
     }
   }
+
+  static async DeleteProduct(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+      const userPermissions = req.userPermissions || [];
+
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const id = parseInt(req.params.id as string, 10);
+      const existingProduct = await ProductRepository.FetchProductById(id);
+
+      if (!existingProduct) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      const canDelete = RBAC.CanPerformAction(userPermissions, userId, existingProduct.owner.id, [
+        "product:delete:own",
+        "product:delete:any",
+      ]);
+
+      if (!canDelete) {
+        return res.status(403).json({ error: "Forbidden: You can only delete your own products" });
+      }
+
+      await ProductRepository.SoftDeleteProduct(id);
+      return res.status(204).send();
+    } catch (error) {
+      console.log("delete product failed", error);
+      return res.status(500).json({ error: "Something went wrong" });
+    }
+  }
 }
