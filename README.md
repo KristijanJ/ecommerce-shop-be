@@ -1,61 +1,50 @@
-# E-Commerce Shop Backend
+# ecommerce-shop-be
 
-## Setup
+REST API backend for the ecommerce shop.
 
-### Prisma Setup
+## Stack
 
-Initial Prisma setup was done using the [Prisma PostgreSQL Quickstart Guide](https://www.prisma.io/docs/getting-started/prisma-orm/quickstart/postgresql).
+- **Express** — HTTP server
+- **Prisma** — ORM and migrations
+- **PostgreSQL** — database
+- **bcrypt** — password hashing
+- **jose** — JWT signing and verification
+- **Zod** — request validation
 
-Commands used:
+## Development
 
-```bash
-# Initialize Prisma with PostgreSQL
-npx prisma init --datasource-provider postgresql --output ../generated/prisma
-
-# Update your .env file with your PostgreSQL connection string:
-# DATABASE_URL="postgresql://username:password@localhost:5432/mydb?schema=public"
-
-# Create initial migration
-npx prisma migrate dev --name init
-
-# Generate Prisma Client
-npx prisma generate
-```
-
-### Development
+Copy the example env and fill in the values:
 
 ```bash
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
+cp .env.example .env
 ```
-
-## Database Commands
 
 ```bash
-# Create a new migration (and apply it in development)
-npx prisma migrate dev --name <migration_name>
-
-# Create migration only (without applying it)
-npx prisma migrate dev --create-only --name <migration_name>
-
-# Apply pending migrations (production)
-npx prisma migrate deploy
-
-# Apply pending migrations (development)
-npx prisma migrate dev
-
-# Generate Prisma Client (after schema changes)
-npx prisma generate
-
-# Open Prisma Studio (database GUI)
-npx prisma studio
-
-# Reset database (careful!)
-npx prisma migrate reset
+npm run dev       # start with hot reload
+npm run build     # compile to dist/
+npm start         # run compiled build
 ```
+
+## Database
+
+```bash
+npm run db:seed                                    # seed roles, permissions, users, products
+
+npx prisma migrate dev --name <name>              # create + apply migration
+npx prisma migrate deploy                         # apply migrations (production)
+npx prisma generate                               # regenerate client after schema change
+npx prisma studio                                 # open database GUI
+npx prisma migrate reset                          # reset DB and re-run all migrations
+```
+
+## Seed users
+
+All seed users share the password `Password123!`.
+
+| Email            | Role   |
+| ---------------- | ------ |
+| admin@shop.com   | admin  |
+| seller1@shop.com | seller |
+| seller2@shop.com | seller |
+| buyer1@shop.com  | buyer  |
+| buyer2@shop.com  | buyer  |
