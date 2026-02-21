@@ -1,4 +1,7 @@
+import * as bcrypt from "bcrypt";
+
 import { prisma } from "../src/lib/prisma";
+import dummyProducts from "../dummy-products.js";
 
 const roles = [
   {
@@ -82,6 +85,46 @@ const rolePermissions = [
   { roleId: 3, permissionId: 13 }, // user:update:own
 ];
 
+const SEED_PASSWORD = "Password123!";
+
+const users = [
+  {
+    id: 1,
+    email: "admin@shop.com",
+    firstName: "Admin",
+    lastName: "User",
+    roleId: 1, // admin
+  },
+  {
+    id: 2,
+    email: "seller1@shop.com",
+    firstName: "Alice",
+    lastName: "Seller",
+    roleId: 2, // seller
+  },
+  {
+    id: 3,
+    email: "seller2@shop.com",
+    firstName: "Bob",
+    lastName: "Seller",
+    roleId: 2, // seller
+  },
+  {
+    id: 4,
+    email: "buyer1@shop.com",
+    firstName: "Carol",
+    lastName: "Buyer",
+    roleId: 3, // buyer
+  },
+  {
+    id: 5,
+    email: "buyer2@shop.com",
+    firstName: "Dave",
+    lastName: "Buyer",
+    roleId: 3, // buyer
+  },
+];
+
 const categories = [
   {
     id: 1,
@@ -137,11 +180,74 @@ async function main() {
     });
   }
 
+  // Seed users
+  const hashedPassword = await bcrypt.hash(SEED_PASSWORD, 10);
+  for (const user of users) {
+    await prisma.user.upsert({
+      where: { id: user.id },
+      create: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        password: hashedPassword,
+      },
+      update: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        password: hashedPassword,
+      },
+    });
+  }
+
+  // Seed user roles (delete existing first to avoid conflicts)
+  await prisma.userRole.deleteMany({});
+  for (const user of users) {
+    await prisma.userRole.create({
+      data: { userId: user.id, roleId: user.roleId },
+    });
+  }
+
+  // Seed products — split between the two sellers
+  // seller1 (id: 2) gets odd-indexed products, seller2 (id: 3) gets even-indexed
+  for (const product of dummyProducts) {
+    const ownerId = product.id % 2 === 0 ? 3 : 2;
+    await prisma.product.upsert({
+      where: { id: product.id },
+      create: {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        description: product.description,
+        image: product.image,
+        ratingRate: product.ratingRate,
+        ratingCount: product.ratingCount,
+        stock: 50,
+        productCategoryId: product.category,
+        ownerId,
+      },
+      update: {
+        title: product.title,
+        price: product.price,
+        description: product.description,
+        image: product.image,
+        ratingRate: product.ratingRate,
+        ratingCount: product.ratingCount,
+        stock: 50,
+        productCategoryId: product.category,
+        ownerId,
+      },
+    });
+  }
+
   console.log("✅ Seeding completed.");
   console.log(`   - ${categories.length} categories`);
   console.log(`   - ${roles.length} roles`);
   console.log(`   - ${permissions.length} permissions`);
   console.log(`   - ${rolePermissions.length} role-permission mappings`);
+  console.log(`   - ${users.length} users (password: ${SEED_PASSWORD})`);
+  console.log(`   - ${dummyProducts.length} products`);
 }
 
 main()

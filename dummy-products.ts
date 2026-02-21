@@ -219,3 +219,5 @@ const products = [
     ratingCount: 145,
   },
 ];
+
+export default products;
