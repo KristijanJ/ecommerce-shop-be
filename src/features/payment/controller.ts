@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ZodError } from "zod";
 import { PaymentRepository } from "./repository.js";
 import { CreatePaymentSchema } from "./schemas.js";
+import logger from "../../lib/logger.js";
 
 export class PaymentController {
   static async CreatePayment(req: Request, res: Response) {
@@ -23,7 +24,7 @@ export class PaymentController {
       if (error instanceof Error) {
         return res.status(400).json({ error: error.message });
       }
-      console.log("create payment failed", error);
+      logger.error({ err: error }, "create payment failed");
       return res.status(500).json({});
     }
   }

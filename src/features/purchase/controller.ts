@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ZodError } from "zod";
 import { PurchaseRepository } from "./repository.js";
 import { CreatePurchaseSchema } from "./schemas.js";
+import logger from "../../lib/logger.js";
 
 export class PurchaseController {
   static async GetPurchaseById(req: Request, res: Response) {
@@ -26,7 +27,7 @@ export class PurchaseController {
 
       return res.status(200).json({ data: purchase });
     } catch (error) {
-      console.log("get purchase by id failed", error);
+      logger.error({ err: error }, "get purchase by id failed");
       return res.status(500).json({});
     }
   }
@@ -42,7 +43,7 @@ export class PurchaseController {
       const purchases = await PurchaseRepository.FetchPurchasesForBuyer(userId);
       return res.status(200).json({ data: purchases });
     } catch (error) {
-      console.log("get all products failed", error);
+      logger.error({ err: error }, "get all purchases for buyer failed");
       return res.status(500).json({});
     }
   }
@@ -66,7 +67,7 @@ export class PurchaseController {
       if (error instanceof Error) {
         return res.status(400).json({ error: error.message });
       }
-      console.log("make new purchase failed", error);
+      logger.error({ err: error }, "make new purchase failed");
       return res.status(500).json({});
     }
   }

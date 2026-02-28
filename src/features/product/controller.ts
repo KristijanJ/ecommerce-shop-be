@@ -3,6 +3,7 @@ import { ProductRepository } from "./repository.js";
 import { IProduct, ProductSchema } from "./schemas.js";
 import { ZodError } from "zod";
 import { RBAC } from "../rbac/service.js";
+import logger from "../../lib/logger.js";
 
 export class ProductController {
   static async GetAllProducts(req: Request, res: Response) {
@@ -17,7 +18,7 @@ export class ProductController {
 
       return res.status(200).json({ data: products });
     } catch (error) {
-      console.log("get all products failed", error);
+      logger.error({ err: error }, "get all products failed");
       return res.status(500).json({});
     }
   }
@@ -34,7 +35,7 @@ export class ProductController {
 
       return res.status(200).json({ data: product });
     } catch (error) {
-      console.log("get product by id failed", error);
+      logger.error({ err: error }, "get product by id failed");
       return res.status(500).json({});
     }
   }
@@ -50,7 +51,7 @@ export class ProductController {
       const products = await ProductRepository.FetchProductsByOwner(userId);
       return res.status(200).json({ data: products });
     } catch (error) {
-      console.log("get my products failed", error);
+      logger.error({ err: error }, "get my products failed");
       return res.status(500).json({ error: "Failed to fetch products" });
     }
   }
@@ -135,7 +136,7 @@ export class ProductController {
       if (error instanceof ZodError) {
         return res.status(400).json({ error: JSON.parse(error.message) });
       }
-      console.log("edit product failed", error);
+      logger.error({ err: error }, "edit product failed");
       return res.status(500).json({ error: "Something went wrong" });
     }
   }
@@ -168,7 +169,7 @@ export class ProductController {
       await ProductRepository.SoftDeleteProduct(id);
       return res.status(204).send();
     } catch (error) {
-      console.log("delete product failed", error);
+      logger.error({ err: error }, "delete product failed");
       return res.status(500).json({ error: "Something went wrong" });
     }
   }

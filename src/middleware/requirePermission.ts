@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { RBACRepository } from "../features/rbac/repository.js";
+import logger from "../lib/logger.js";
 
 /**
  * Middleware to fetch and attach user permissions to request
@@ -17,7 +18,7 @@ export const loadPermissions = async (req: Request, res: Response, next: NextFun
 
     next();
   } catch (error) {
-    console.error("Failed to load permissions:", error);
+    logger.error({ err: error }, "Failed to load permissions");
     return res.status(500).json({ error: "Internal server error" });
   }
 };

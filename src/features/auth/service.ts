@@ -2,6 +2,7 @@ import * as bcrypt from "bcrypt";
 
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
 import { IUserDto } from "../user/schemas.js";
+import logger from "../../lib/logger.js";
 
 interface CustomJWTPayload extends JWTPayload {
   id: number;
@@ -44,7 +45,7 @@ export class AuthService {
 
       return payload as CustomJWTPayload;
     } catch (error) {
-      console.log("verifyJwt failed", error);
+      logger.warn({ err: error }, "JWT verification failed");
       return null;
     }
   }
