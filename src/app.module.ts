@@ -3,6 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerModule } from 'nestjs-pino';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProductModule } from './product/product.module';
+import { CategoryModule } from './category/category.module';
+import { PaymentModule } from './payment/payment.module';
+import { PurchaseModule } from './purchase/purchase.module';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
+import { RbacModule } from './rbac/rbac.module';
 
 @Module({
   imports: [
@@ -31,6 +38,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
             : undefined,
       },
     }),
+    ProductModule,
+    CategoryModule,
+    PaymentModule,
+    PurchaseModule,
+    UserModule,
+    AuthModule,
+    RbacModule,
   ],
   controllers: [AppController],
   providers: [AppService],
