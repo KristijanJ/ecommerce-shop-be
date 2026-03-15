@@ -1,98 +1,156 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# ecommerce-shop-be
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+REST API backend for the ecommerce shop. Part of a multi-repo project:
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+| Repo                                                                         | Purpose                                        |
+| ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| [ecommerce-shop-be](https://github.com/KristijanJ/ecommerce-shop-be)         | **This repo** - NestJS REST API                |
+| [ecommerce-shop-fe](https://github.com/KristijanJ/ecommerce-shop-fe)         | Next.js frontend                               |
+| [ecommerce-shop-gitops](https://github.com/KristijanJ/ecommerce-shop-gitops) | Kubernetes manifests, ArgoCD, platform tooling |
+| [ecommerce-infra](https://github.com/KristijanJ/ecommerce-infra)             | Local Docker Compose for PostgreSQL and Redis  |
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Stack
 
-## Project setup
+| Technology          | Role                       | Why                                                               |
+| ------------------- | -------------------------- | ----------------------------------------------------------------- |
+| **NestJS**          | HTTP server + framework    | Modular, decorator-based architecture with built-in DI            |
+| **TypeORM**         | ORM + migrations           | Type-safe DB access, migration files tracked in Git               |
+| **PostgreSQL**      | Database                   | Primary data store                                                |
+| **class-validator** | Request validation         | DTO-based validation at API boundaries                            |
+| **bcrypt**          | Password hashing           | Secure credential storage                                         |
+| **@nestjs/jwt**     | JWT signing + verification | Bearer token auth via Passport                                    |
+| **pino**            | Structured logging         | JSON logs to stdout — compatible with Loki log aggregation in k8s |
+
+---
+
+## API Endpoints
+
+| Method   | Path             | Auth     | Description                                    |
+| -------- | ---------------- | -------- | ---------------------------------------------- |
+| `POST`   | `/auth/register` | —        | Register a new user                            |
+| `POST`   | `/auth/login`    | —        | Login, returns JWT                             |
+| `GET`    | `/products`      | —        | List products (filter by `?category=&search=`) |
+| `GET`    | `/products/:id`  | —        | Get product by ID                              |
+| `GET`    | `/products/mine` | ✓ seller | Get authenticated seller's products            |
+| `POST`   | `/products`      | ✓ seller | Create product                                 |
+| `PUT`    | `/products/:id`  | ✓ seller | Update product (own only, unless admin)        |
+| `DELETE` | `/products/:id`  | ✓ seller | Delete product (own only, unless admin)        |
+| `GET`    | `/categories`    | —        | List categories                                |
+| `GET`    | `/purchases`     | ✓ buyer  | List purchases for authenticated user          |
+| `GET`    | `/purchases/:id` | ✓ buyer  | Get purchase by ID                             |
+| `POST`   | `/purchases`     | ✓ buyer  | Create purchase from cart items                |
+| `POST`   | `/payments`      | ✓ buyer  | Process payment for a purchase                 |
+| `GET`    | `/health`        | —        | Liveness probe                                 |
+| `GET`    | `/ready`         | —        | Readiness probe (checks DB connectivity)       |
+
+Interactive API docs (Swagger UI) available at `/api/docs`.
+
+### Auth
+
+JWT is issued on login/register and expected as `Authorization: Bearer <token>`. The frontend stores it in an `httpOnly` cookie and forwards it on server-side API calls.
+
+### RBAC
+
+Permissions are role-based (`buyer`, `seller`, `admin`). The `PermissionsGuard` loads role permissions from the DB on each request. Controllers declare required permissions via `@RequirePermissions()` (e.g. `product:update:own` vs `product:update:any`).
+
+---
+
+## Local Development
+
+### Prerequisites
+
+Start PostgreSQL via the infra repo:
 
 ```bash
-$ npm install
+# in ecommerce-infra
+make start-local
 ```
 
-## Compile and run the project
+### Setup
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cp .env.example .env    # fill in DB credentials and JWT_SECRET
+npm install
+npm run start:dev       # starts with hot reload
 ```
 
-## Run tests
+### Database
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run migration:generate -- src/database/migrations/<name>  # generate a new migration
+npm run migration:run                                          # apply pending migrations
+npm run migration:revert                                       # revert last migration
+npm run db:seed                                                # seed roles, permissions, users, products
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Build
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run build       # compile TypeScript to dist/
+npm run start:prod  # run the compiled build
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## Seed Users
 
-Check out a few resources that may come in handy when working with NestJS:
+All seed users share the password `Password123!`.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+| Email              | Role   |
+| ------------------ | ------ |
+| <admin@shop.com>   | admin  |
+| <seller1@shop.com> | seller |
+| <seller2@shop.com> | seller |
+| <buyer1@shop.com>  | buyer  |
+| <buyer2@shop.com>  | buyer  |
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Logging
 
-## Stay in touch
+Structured JSON logging via [pino](https://getpino.io). Every log line is a JSON object written to stdout — ready for Loki to ingest in Kubernetes.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+In development, `pino-pretty` is used automatically for colorized, human-readable output. In production, raw JSON is preserved.
 
-## License
+HTTP request/response logging is handled automatically by `pino-http`. Log level is controlled by the `LOG_LEVEL` environment variable (default: `info`).
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+# In k8s, query logs in Grafana → Loki:
+# {namespace="local-backend"} | json | level="error"
+```
+
+---
+
+## Docker
+
+```bash
+docker build -t kristijan92/ecommerce-shop-be:latest .
+
+docker run -p 3000:3000 \
+  --add-host=host.docker.internal:host-gateway \
+  -e DB_HOST=host.docker.internal \
+  -e DB_PORT=5432 \
+  -e DB_USER=postgres \
+  -e DB_PASS=postgres \
+  -e DB_DATABASE=ecommerce \
+  -e JWT_SECRET=change-me \
+  -e NODE_ENV=production \
+  kristijan92/ecommerce-shop-be:latest
+```
+
+---
+
+## Environment Variables
+
+| Variable      | Description                       |
+| ------------- | --------------------------------- |
+| `DB_HOST`     | PostgreSQL host                   |
+| `DB_PORT`     | PostgreSQL port (default: `5432`) |
+| `DB_USER`     | PostgreSQL username               |
+| `DB_PASS`     | PostgreSQL password               |
+| `DB_DATABASE` | PostgreSQL database name          |
+| `JWT_SECRET`  | Secret key for signing JWTs       |
+| `PORT`        | HTTP port (default: `3000`)       |
+| `LOG_LEVEL`   | Pino log level (default: `info`)  |
