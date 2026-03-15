@@ -1,34 +1,37 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+  HttpCode,
+} from '@nestjs/common';
 import { PurchaseService } from './purchase.service';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
-import { UpdatePurchaseDto } from './dto/update-purchase.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { JwtPayload } from '../auth/strategies/jwt.strategy';
 
-@Controller('purchase')
+@Controller('purchases')
+@UseGuards(JwtAuthGuard)
 export class PurchaseController {
   constructor(private readonly purchaseService: PurchaseService) {}
 
-  @Post()
-  create(@Body() createPurchaseDto: CreatePurchaseDto) {
-    return this.purchaseService.create(createPurchaseDto);
-  }
-
   @Get()
-  findAll() {
-    return this.purchaseService.findAll();
+  findAll(@CurrentUser() user: JwtPayload) {
+    return this.purchaseService.findAll(user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.purchaseService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+    return this.purchaseService.findOne(id, user.id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePurchaseDto: UpdatePurchaseDto) {
-    return this.purchaseService.update(+id, updatePurchaseDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.purchaseService.remove(+id);
+  @Post()
+  @HttpCode(201)
+  create(@Body() dto: CreatePurchaseDto, @CurrentUser() user: JwtPayload) {
+    return this.purchaseService.create(dto, user.id);
   }
 }

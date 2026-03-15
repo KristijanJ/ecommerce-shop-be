@@ -1,1 +1,7 @@
-export class CreatePaymentDto {}
+import { IsInt, IsPositive } from 'class-validator';
+
+export class CreatePaymentDto {
+  @IsInt()
+  @IsPositive()
+  purchaseId: number;
+}

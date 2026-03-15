@@ -1,26 +1,42 @@
 import { Injectable } from '@nestjs/common';
-import { CreateRbacDto } from './dto/create-rbac.dto';
-import { UpdateRbacDto } from './dto/update-rbac.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
+import { Role } from './entities/role.entity';
 
 @Injectable()
 export class RbacService {
-  create(createRbacDto: CreateRbacDto) {
-    return 'This action adds a new rbac';
+  constructor(
+    @InjectRepository(Role) private readonly roleRepo: Repository<Role>,
+  ) {}
+
+  async fetchPermissionsForRoles(roleNames: string[]): Promise<string[]> {
+    const roles = await this.roleRepo.find({
+      where: { name: In(roleNames), isActive: true },
+      relations: { rolePermissions: { permission: true } },
+    });
+
+    return roles.flatMap((role) =>
+      role.rolePermissions.map((rp) => rp.permission.name),
+    );
   }
 
-  findAll() {
-    return `This action returns all rbac`;
-  }
+  canPerformAction(
+    userPermissions: string[],
+    userId: number,
+    resourceOwnerId: number,
+    requiredPermissions: string[],
+  ): boolean {
+    const anyPerms = requiredPermissions.filter((p) => p.endsWith(':any'));
+    if (userPermissions.some((p) => anyPerms.includes(p))) return true;
 
-  findOne(id: number) {
-    return `This action returns a #${id} rbac`;
-  }
+    const ownPerms = requiredPermissions.filter((p) => p.endsWith(':own'));
+    if (userPermissions.some((p) => ownPerms.includes(p)) && userId === resourceOwnerId) return true;
 
-  update(id: number, updateRbacDto: UpdateRbacDto) {
-    return `This action updates a #${id} rbac`;
-  }
+    const genericPerms = requiredPermissions.filter(
+      (p) => !p.endsWith(':own') && !p.endsWith(':any'),
+    );
+    if (userPermissions.some((p) => genericPerms.includes(p))) return true;
 
-  remove(id: number) {
-    return `This action removes a #${id} rbac`;
+    return false;
   }
 }
