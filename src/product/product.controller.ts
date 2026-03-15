@@ -11,6 +11,7 @@ import {
   UseGuards,
   HttpCode,
 } from '@nestjs/common';
+import { ApiQuery } from '@nestjs/swagger';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -25,6 +26,8 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get()
+  @ApiQuery({ name: 'category', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false })
   findAll(
     @Query('category') category?: string,
     @Query('search') search?: string,
