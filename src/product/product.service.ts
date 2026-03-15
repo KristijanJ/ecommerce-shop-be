@@ -2,7 +2,6 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
@@ -17,7 +16,6 @@ export class ProductService {
     @InjectRepository(Product)
     private readonly productRepo: Repository<Product>,
     private readonly rbacService: RbacService,
-    private readonly logger = new Logger(ProductService.name),
   ) {}
 
   findAll(categoryId?: number, search?: string) {
@@ -95,33 +93,24 @@ export class ProductService {
     userId: number,
     userRoles: string[],
   ) {
-    try {
-      this.logger.log('MYLOG 1');
-      const product = await this.productRepo.findOne({
-        where: { id, isActive: true },
-        relations: { owner: true },
-      });
-      if (!product) throw new NotFoundException();
-      this.logger.log('MYLOG 2');
+    const product = await this.productRepo.findOne({
+      where: { id, isActive: true },
+      relations: { owner: true },
+    });
+    if (!product) throw new NotFoundException();
 
-      const permissions =
-        await this.rbacService.fetchPermissionsForRoles(userRoles);
-      const canEdit = this.rbacService.canPerformAction(
-        permissions,
-        userId,
-        product.owner.id,
-        ['product:update:own', 'product:update:any'],
-      );
-      if (!canEdit) throw new ForbiddenException();
+    const permissions =
+      await this.rbacService.fetchPermissionsForRoles(userRoles);
+    const canEdit = this.rbacService.canPerformAction(
+      permissions,
+      userId,
+      product.owner.id,
+      ['product:update:own', 'product:update:any'],
+    );
+    if (!canEdit) throw new ForbiddenException();
 
-      this.logger.log('MYLOG 3', { product, dto });
-
-      Object.assign(product, dto);
-      return this.productRepo.save(product);
-    } catch (error) {
-      this.logger.error(error.message, error.stack);
-      throw error;
-    }
+    Object.assign(product, dto);
+    return this.productRepo.save(product);
   }
 
   async remove(id: number, userId: number, userRoles: string[]) {

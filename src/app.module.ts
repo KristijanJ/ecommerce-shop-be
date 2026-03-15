@@ -47,20 +47,33 @@ import { RolePermission } from './rbac/entities/role-permission.entity';
       ],
     }),
     LoggerModule.forRoot({
-      pinoHttp: {
-        transport:
-          process.env.NODE_ENV !== 'production'
-            ? {
+      pinoHttp:
+        process.env.NODE_ENV !== 'production'
+          ? {
+              customSuccessMessage: (req, res) =>
+                `${req.method} ${req.url} → ${res.statusCode}`,
+              customErrorMessage: (req, res) =>
+                `${req.method} ${req.url} → ${res.statusCode}`,
+              customLogLevel: (_req, res) => {
+                if (res.statusCode >= 500) return 'silent';
+                if (res.statusCode >= 400) return 'warn';
+                return 'info';
+              },
+              serializers: {
+                req: () => undefined,
+                res: () => undefined,
+              },
+              transport: {
                 target: 'pino-pretty',
                 options: {
                   colorize: true,
                   levelFirst: true,
                   translateTime: 'SYS:HH:MM:ss.l',
-                  ignore: 'pid,hostname',
+                  ignore: 'pid,hostname,req,res',
                 },
-              }
-            : undefined,
-      },
+              },
+            }
+          : {},
     }),
     ProductModule,
     CategoryModule,
