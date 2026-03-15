@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RbacController } from './rbac.controller';
-import { RbacService } from './rbac.service';
 import { mockGuards } from '../common/test/mock-guards';
 
 describe('RbacController', () => {
@@ -10,7 +9,6 @@ describe('RbacController', () => {
     const module: TestingModule = await mockGuards(
       Test.createTestingModule({
         controllers: [RbacController],
-        providers: [RbacService],
       }),
     ).compile();
 

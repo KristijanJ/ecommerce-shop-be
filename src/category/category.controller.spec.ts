@@ -3,6 +3,10 @@ import { CategoryController } from './category.controller';
 import { CategoryService } from './category.service';
 import { mockGuards } from '../common/test/mock-guards';
 
+const mockCategoryService = {
+  findAll: jest.fn(),
+};
+
 describe('CategoryController', () => {
   let controller: CategoryController;
 
@@ -10,7 +14,9 @@ describe('CategoryController', () => {
     const module: TestingModule = await mockGuards(
       Test.createTestingModule({
         controllers: [CategoryController],
-        providers: [CategoryService],
+        providers: [
+          { provide: CategoryService, useValue: mockCategoryService },
+        ],
       }),
     ).compile();
 

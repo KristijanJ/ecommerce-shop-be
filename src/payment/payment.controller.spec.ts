@@ -3,6 +3,8 @@ import { PaymentController } from './payment.controller';
 import { PaymentService } from './payment.service';
 import { mockGuards } from '../common/test/mock-guards';
 
+const mockPaymentService = { create: jest.fn() };
+
 describe('PaymentController', () => {
   let controller: PaymentController;
 
@@ -10,11 +12,12 @@ describe('PaymentController', () => {
     const module: TestingModule = await mockGuards(
       Test.createTestingModule({
         controllers: [PaymentController],
-        providers: [PaymentService],
+        providers: [{ provide: PaymentService, useValue: mockPaymentService }],
       }),
     ).compile();
 
     controller = module.get<PaymentController>(PaymentController);
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
