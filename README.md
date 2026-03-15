@@ -4,7 +4,7 @@ REST API backend for the ecommerce shop. Part of a multi-repo project:
 
 | Repo                                                                         | Purpose                                        |
 | ---------------------------------------------------------------------------- | ---------------------------------------------- |
-| [ecommerce-shop-be](https://github.com/KristijanJ/ecommerce-shop-be)         | **This repo** - Express.js REST API            |
+| [ecommerce-shop-be](https://github.com/KristijanJ/ecommerce-shop-be)         | **This repo** - NestJS REST API                |
 | [ecommerce-shop-fe](https://github.com/KristijanJ/ecommerce-shop-fe)         | Next.js frontend                               |
 | [ecommerce-shop-gitops](https://github.com/KristijanJ/ecommerce-shop-gitops) | Kubernetes manifests, ArgoCD, platform tooling |
 | [ecommerce-infra](https://github.com/KristijanJ/ecommerce-infra)             | Local Docker Compose for PostgreSQL and Redis  |
@@ -13,15 +13,15 @@ REST API backend for the ecommerce shop. Part of a multi-repo project:
 
 ## Stack
 
-| Technology     | Role                       | Why                                                               |
-| -------------- | -------------------------- | ----------------------------------------------------------------- |
-| **Express.js** | HTTP server                | Lightweight, straightforward for a REST API                       |
-| **Prisma**     | ORM + migrations           | Type-safe DB access, migration files tracked in Git               |
-| **PostgreSQL** | Database                   | Primary data store                                                |
-| **Zod**        | Request validation         | Schema validation at API boundaries                               |
-| **bcrypt**     | Password hashing           | Secure credential storage                                         |
-| **jose**       | JWT signing + verification | Cookie-based session auth                                         |
-| **pino**       | Structured logging         | JSON logs to stdout — compatible with Loki log aggregation in k8s |
+| Technology          | Role                       | Why                                                               |
+| ------------------- | -------------------------- | ----------------------------------------------------------------- |
+| **NestJS**          | HTTP server + framework    | Modular, decorator-based architecture with built-in DI            |
+| **TypeORM**         | ORM + migrations           | Type-safe DB access, migration files tracked in Git               |
+| **PostgreSQL**      | Database                   | Primary data store                                                |
+| **class-validator** | Request validation         | DTO-based validation at API boundaries                            |
+| **bcrypt**          | Password hashing           | Secure credential storage                                         |
+| **@nestjs/jwt**     | JWT signing + verification | Bearer token auth via Passport                                    |
+| **pino**            | Structured logging         | JSON logs to stdout — compatible with Loki log aggregation in k8s |
 
 ---
 
@@ -45,13 +45,15 @@ REST API backend for the ecommerce shop. Part of a multi-repo project:
 | `GET`    | `/health`        | —        | Liveness probe                                 |
 | `GET`    | `/ready`         | —        | Readiness probe (checks DB connectivity)       |
 
+Interactive API docs (Swagger UI) available at `/api/docs`.
+
 ### Auth
 
 JWT is issued on login/register and expected as `Authorization: Bearer <token>`. The frontend stores it in an `httpOnly` cookie and forwards it on server-side API calls.
 
 ### RBAC
 
-Permissions are role-based (`buyer`, `seller`, `admin`). The `requirePermission` middleware loads role permissions from the DB and attaches them to the request. Controllers check specific permissions (e.g. `product:update:own` vs `product:update:any`).
+Permissions are role-based (`buyer`, `seller`, `admin`). The `PermissionsGuard` loads role permissions from the DB on each request. Controllers declare required permissions via `@RequirePermissions()` (e.g. `product:update:own` vs `product:update:any`).
 
 ---
 
@@ -59,7 +61,7 @@ Permissions are role-based (`buyer`, `seller`, `admin`). The `requirePermission`
 
 ### Prerequisites
 
-Start PostgreSQL (and Redis for the frontend) via the infra repo:
+Start PostgreSQL via the infra repo:
 
 ```bash
 # in ecommerce-infra
@@ -69,27 +71,25 @@ make start-local
 ### Setup
 
 ```bash
-cp .env.example .env    # fill in DATABASE_URL and JWT_SECRET
+cp .env.example .env    # fill in DB credentials and JWT_SECRET
 npm install
-npm run dev             # starts with hot reload (tsx --watch)
+npm run start:dev       # starts with hot reload
 ```
 
 ### Database
 
 ```bash
-npx prisma migrate dev --name <name>    # create + apply a new migration
-npx prisma migrate deploy               # apply pending migrations (used in k8s)
-npx prisma generate                     # regenerate client after schema changes
-npx prisma studio                       # open database GUI at localhost:5555
-npx prisma migrate reset                # wipe DB and re-run all migrations
-npm run db:seed                         # seed roles, permissions, users, products
+npm run migration:generate -- src/database/migrations/<name>  # generate a new migration
+npm run migration:run                                          # apply pending migrations
+npm run migration:revert                                       # revert last migration
+npm run db:seed                                                # seed roles, permissions, users, products
 ```
 
 ### Build
 
 ```bash
-npm run build    # compile TypeScript to dist/
-npm start        # run the compiled build
+npm run build       # compile TypeScript to dist/
+npm run start:prod  # run the compiled build
 ```
 
 ---
@@ -98,13 +98,13 @@ npm start        # run the compiled build
 
 All seed users share the password `Password123!`.
 
-| Email            | Role   |
-| ---------------- | ------ |
-| admin@shop.com   | admin  |
-| seller1@shop.com | seller |
-| seller2@shop.com | seller |
-| buyer1@shop.com  | buyer  |
-| buyer2@shop.com  | buyer  |
+| Email              | Role   |
+| ------------------ | ------ |
+| <admin@shop.com>   | admin  |
+| <seller1@shop.com> | seller |
+| <seller2@shop.com> | seller |
+| <buyer1@shop.com>  | buyer  |
+| <buyer2@shop.com>  | buyer  |
 
 ---
 
@@ -112,14 +112,11 @@ All seed users share the password `Password123!`.
 
 Structured JSON logging via [pino](https://getpino.io). Every log line is a JSON object written to stdout — ready for Loki to ingest in Kubernetes.
 
-HTTP request/response logging is handled automatically by `pino-http`. Health check endpoints (`/health`, `/ready`) are excluded to reduce noise from k8s probes.
+In development, `pino-pretty` is used automatically for colorized, human-readable output. In production, raw JSON is preserved.
 
-Log level is controlled by the `LOG_LEVEL` environment variable (default: `info`).
+HTTP request/response logging is handled automatically by `pino-http`. Log level is controlled by the `LOG_LEVEL` environment variable (default: `info`).
 
 ```bash
-# Pretty-print logs locally
-node dist/src/index.js | npx pino-pretty
-
 # In k8s, query logs in Grafana → Loki:
 # {namespace="local-backend"} | json | level="error"
 ```
@@ -129,19 +126,31 @@ node dist/src/index.js | npx pino-pretty
 ## Docker
 
 ```bash
-docker build -t ecommerce-shop-be:local .
-docker run -p 3000:3000 --env-file .env ecommerce-shop-be:local
-```
+docker build -t kristijan92/ecommerce-shop-be:latest .
 
-The image is published to Docker Hub at `kristijan92/ecommerce-shop-be` and loaded into the KinD cluster via `make load-backend-image` in the gitops repo.
+docker run -p 3000:3000 \
+  --add-host=host.docker.internal:host-gateway \
+  -e DB_HOST=host.docker.internal \
+  -e DB_PORT=5432 \
+  -e DB_USER=postgres \
+  -e DB_PASS=postgres \
+  -e DB_DATABASE=ecommerce \
+  -e JWT_SECRET=change-me \
+  -e NODE_ENV=production \
+  kristijan92/ecommerce-shop-be:latest
+```
 
 ---
 
 ## Environment Variables
 
-| Variable       | Description                      |
-| -------------- | -------------------------------- |
-| `DATABASE_URL` | PostgreSQL connection string     |
-| `JWT_SECRET`   | Secret key for signing JWTs      |
-| `PORT`         | HTTP port (default: `3000`)      |
-| `LOG_LEVEL`    | Pino log level (default: `info`) |
+| Variable      | Description                       |
+| ------------- | --------------------------------- |
+| `DB_HOST`     | PostgreSQL host                   |
+| `DB_PORT`     | PostgreSQL port (default: `5432`) |
+| `DB_USER`     | PostgreSQL username               |
+| `DB_PASS`     | PostgreSQL password               |
+| `DB_DATABASE` | PostgreSQL database name          |
+| `JWT_SECRET`  | Secret key for signing JWTs       |
+| `PORT`        | HTTP port (default: `3000`)       |
+| `LOG_LEVEL`   | Pino log level (default: `info`)  |

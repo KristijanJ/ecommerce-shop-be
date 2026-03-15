@@ -7,9 +7,6 @@ yarn-error.log
 dist
 *.tsbuildinfo
 
-# Generated files
-generated
-
 # Environment files
 .env
 .env.*
@@ -39,7 +36,6 @@ tests
 *.test.ts
 *.spec.ts
 coverage
-.nyc_output
 
 # CI/CD
 .github
@@ -51,7 +47,7 @@ coverage
 .eslintignore
 .prettierrc*
 .prettierignore
-eslint.config.js
+eslint.config*
 
 # Docker
 Dockerfile

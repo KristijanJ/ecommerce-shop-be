@@ -1,0 +1,26 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
+import { mockGuards } from '../common/test/mock-guards';
+
+const mockUserService = { getUser: jest.fn(), createUser: jest.fn() };
+
+describe('UserController', () => {
+  let controller: UserController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await mockGuards(
+      Test.createTestingModule({
+        controllers: [UserController],
+        providers: [{ provide: UserService, useValue: mockUserService }],
+      }),
+    ).compile();
+
+    controller = module.get<UserController>(UserController);
+    jest.clearAllMocks();
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});
