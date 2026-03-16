@@ -18,9 +18,15 @@ export class ProductService {
     private readonly rbacService: RbacService,
   ) {}
 
-  findAll(categoryId?: number, search?: string) {
-    return this.productRepo.find({
-      take: 20,
+  async findAll(
+    page?: number,
+    limit?: number,
+    categoryId?: number,
+    search?: string,
+  ) {
+    const [products, total] = await this.productRepo.findAndCount({
+      take: limit ?? 10,
+      skip: ((page ?? 1) - 1) * (limit ?? 10),
       where: {
         isActive: true,
         ...(categoryId ? { categoryId: categoryId } : {}),
@@ -40,6 +46,8 @@ export class ProductService {
         owner: { id: true, email: true, firstName: true, lastName: true },
       },
     });
+
+    return { products, total };
   }
 
   async findOne(id: number) {
