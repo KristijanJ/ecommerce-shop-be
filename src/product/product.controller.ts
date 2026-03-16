@@ -28,12 +28,18 @@ export class ProductController {
   @Get()
   @ApiQuery({ name: 'category', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false })
-  findAll(
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async findAll(
     @Query('category') category?: string,
     @Query('search') search?: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
     const categoryId = category ? parseInt(category, 10) : undefined;
-    return this.productService.findAll(
+    return await this.productService.findAll(
+      page,
+      limit,
       categoryId && !isNaN(categoryId) ? categoryId : undefined,
       search,
     );
@@ -70,7 +76,10 @@ export class ProductController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.productService.remove(id, user.id, user.roles);
   }
 }
