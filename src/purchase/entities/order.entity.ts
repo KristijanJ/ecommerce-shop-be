@@ -40,7 +40,7 @@ export class Order {
   @Column({ nullable: true })
   purchaseId: number;
 
-  @OneToMany('OrderItem', 'order')
+  @OneToMany('OrderItem', 'order', { cascade: true })
   orderItems: OrderItem[];
 
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })

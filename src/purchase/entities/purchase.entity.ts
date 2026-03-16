@@ -37,7 +37,7 @@ export class Purchase {
   })
   status: PurchaseStatus;
 
-  @OneToMany('Order', 'purchase')
+  @OneToMany('Order', 'purchase', { cascade: true })
   orders: Order[];
 
   @OneToMany('Payment', 'purchase')
