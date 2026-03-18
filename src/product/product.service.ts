@@ -71,10 +71,23 @@ export class ProductService {
     return product;
   }
 
-  findMine(ownerId: number) {
-    return this.productRepo.find({
-      where: { ownerId, isActive: true },
-      relations: { category: true, owner: true },
+  async findMine(
+    ownerId: number,
+    page?: number,
+    limit?: number,
+    categoryId?: number,
+    search?: string,
+  ) {
+    const [products, total] = await this.productRepo.findAndCount({
+      take: limit ?? 10,
+      skip: ((page ?? 1) - 1) * (limit ?? 10),
+      where: {
+        ownerId,
+        isActive: true,
+        ...(categoryId ? { categoryId: categoryId } : {}),
+        ...(search ? { title: ILike(`%${search}%`) } : {}),
+      },
+      relations: { category: true, owner: true, orderItems: true },
       select: {
         id: true,
         title: true,
@@ -86,8 +99,15 @@ export class ProductService {
         stock: true,
         category: { id: true, name: true },
         owner: { id: true, email: true, firstName: true, lastName: true },
+        orderItems: {
+          id: true,
+          quantity: true,
+          priceAtPurchase: true,
+        },
       },
     });
+
+    return { products, total };
   }
 
   async create(dto: CreateProductDto, ownerId: number) {
