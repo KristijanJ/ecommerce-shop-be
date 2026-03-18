@@ -47,8 +47,25 @@ export class ProductController {
 
   @UseGuards(JwtAuthGuard)
   @Get('mine')
-  findMine(@CurrentUser() user: JwtPayload) {
-    return this.productService.findMine(user.id);
+  @ApiQuery({ name: 'category', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async findMine(
+    @CurrentUser() user: JwtPayload,
+    @Query('category') category?: string,
+    @Query('search') search?: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ) {
+    const categoryId = category ? parseInt(category, 10) : undefined;
+    return await this.productService.findMine(
+      user.id,
+      page,
+      limit,
+      categoryId && !isNaN(categoryId) ? categoryId : undefined,
+      search,
+    );
   }
 
   @Get(':id')
