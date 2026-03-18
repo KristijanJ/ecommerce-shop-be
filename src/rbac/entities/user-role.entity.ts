@@ -1,4 +1,10 @@
-import { Entity, PrimaryColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import type { User } from '../../user/entities/user.entity';
 import type { Role } from './role.entity';
 
@@ -15,4 +21,10 @@ export class UserRole {
 
   @ManyToOne('Role', 'userRoles')
   role: Role;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

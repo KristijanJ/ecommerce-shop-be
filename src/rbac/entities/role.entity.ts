@@ -3,6 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import type { UserRole } from './user-role.entity';
 import type { RolePermission } from './role-permission.entity';
@@ -26,4 +28,10 @@ export class Role {
 
   @OneToMany('RolePermission', 'role')
   rolePermissions: RolePermission[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

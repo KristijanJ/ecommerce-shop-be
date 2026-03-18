@@ -5,6 +5,8 @@ import {
   ManyToOne,
   OneToMany,
   Index,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import type { ProductCategory } from '../../category/entities/category.entity';
 import type { User } from '../../user/entities/user.entity';
@@ -55,4 +57,10 @@ export class Product {
 
   @OneToMany('OrderItem', 'product')
   orderItems: OrderItem[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

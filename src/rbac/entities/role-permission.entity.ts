@@ -1,4 +1,10 @@
-import { Entity, PrimaryColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import type { Role } from './role.entity';
 import type { Permission } from './permission.entity';
 
@@ -15,4 +21,10 @@ export class RolePermission {
 
   @ManyToOne('Permission', 'rolePermissions')
   permission: Permission;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

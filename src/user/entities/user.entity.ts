@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import type { UserRole } from '../../rbac/entities/user-role.entity';
 import type { Product } from '../../product/entities/product.entity';
 import type { Order } from '../../purchase/entities/order.entity';
@@ -38,4 +45,10 @@ export class User {
 
   @OneToMany('Purchase', 'buyer')
   purchases: Purchase[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
