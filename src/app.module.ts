@@ -65,15 +65,17 @@ import { RolePermission } from './rbac/entities/role-permission.entity';
                 req: () => undefined,
                 res: () => undefined,
               },
-              transport: {
-                target: 'pino-pretty',
-                options: {
-                  colorize: true,
-                  levelFirst: true,
-                  translateTime: 'SYS:HH:MM:ss.l',
-                  ignore: 'pid,hostname,req,res',
+              ...(process.env.LOG_PRETTY === 'true' && {
+                transport: {
+                  target: 'pino-pretty',
+                  options: {
+                    colorize: true,
+                    levelFirst: true,
+                    translateTime: 'SYS:HH:MM:ss.l',
+                    ignore: 'pid,hostname,req,res',
+                  },
                 },
-              },
+              }),
             }
           : {},
     }),
