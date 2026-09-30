@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { LoginDto, RegisterDto } from './dto/create-auth.dto';
+import { UpdateProfileDto } from '../user/dto/update-profile.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 
 const SALT_ROUNDS = 12;
@@ -59,7 +60,12 @@ export class AuthService {
     return { token: this.signToken(user) };
   }
 
-  private signToken(user: { id: number; email: string; firstName: string; lastName: string; roles: string[] }) {
+  async updateProfile(userId: number, dto: UpdateProfileDto) {
+    const updated = await this.userService.updateUser(userId, dto);
+    return { token: this.signToken(updated) };
+  }
+
+  signToken(user: { id: number; email: string; firstName: string; lastName: string; roles: string[] }) {
     const payload: JwtPayload = {
       id: user.id,
       email: user.email,
