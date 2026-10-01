@@ -21,6 +21,7 @@
     "db:seed": "TS_NODE_PROJECT=tsconfig.cli.json ts-node -r tsconfig-paths/register src/database/seed.ts",
     "migration:generate": "TS_NODE_PROJECT=tsconfig.cli.json typeorm-ts-node-commonjs migration:generate -d src/database/data-source.ts",
     "migration:run": "TS_NODE_PROJECT=tsconfig.cli.json typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts",
+    "migration:run:prod": "typeorm migration:run -d dist/database/data-source.js",
     "migration:revert": "TS_NODE_PROJECT=tsconfig.cli.json typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts"
   },
   "dependencies": {
