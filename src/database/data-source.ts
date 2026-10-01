@@ -25,6 +25,6 @@ export const AppDataSource = new DataSource({
     Purchase, Order, OrderItem,
     Role, Permission, UserRole, RolePermission,
   ],
-  migrations: ['src/database/migrations/*.ts'],
+  migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,
 });
