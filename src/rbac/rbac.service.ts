@@ -30,7 +30,11 @@ export class RbacService {
     if (userPermissions.some((p) => anyPerms.includes(p))) return true;
 
     const ownPerms = requiredPermissions.filter((p) => p.endsWith(':own'));
-    if (userPermissions.some((p) => ownPerms.includes(p)) && userId === resourceOwnerId) return true;
+    if (
+      userPermissions.some((p) => ownPerms.includes(p)) &&
+      userId === resourceOwnerId
+    )
+      return true;
 
     const genericPerms = requiredPermissions.filter(
       (p) => !p.endsWith(':own') && !p.endsWith(':any'),

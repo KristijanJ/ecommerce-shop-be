@@ -47,8 +47,16 @@ export class UserService {
     @InjectRepository(Role) private readonly roleRepo: Repository<Role>,
   ) {}
 
-  async getUser({ id, email, withPassword = false }: IGetUser): Promise<IUserDto | null> {
-    const where = id ? { id, isActive: true } : email ? { email, isActive: true } : null;
+  async getUser({
+    id,
+    email,
+    withPassword = false,
+  }: IGetUser): Promise<IUserDto | null> {
+    const where = id
+      ? { id, isActive: true }
+      : email
+        ? { email, isActive: true }
+        : null;
     if (!where) return null;
 
     const user = await this.userRepo.findOne({
@@ -78,10 +86,13 @@ export class UserService {
 
     if (dto.newPassword) {
       if (!dto.currentPassword) {
-        throw new BadRequestException('Current password is required to set a new password.');
+        throw new BadRequestException(
+          'Current password is required to set a new password.',
+        );
       }
       const valid = await bcrypt.compare(dto.currentPassword, user.password);
-      if (!valid) throw new UnauthorizedException('Current password is incorrect.');
+      if (!valid)
+        throw new UnauthorizedException('Current password is incorrect.');
       user.password = await bcrypt.hash(dto.newPassword, SALT_ROUNDS);
     }
 
@@ -89,7 +100,9 @@ export class UserService {
     if (dto.lastName) user.lastName = dto.lastName;
 
     if (dto.email && dto.email !== user.email) {
-      const existing = await this.userRepo.findOne({ where: { email: dto.email } });
+      const existing = await this.userRepo.findOne({
+        where: { email: dto.email },
+      });
       if (existing) throw new ConflictException('Email is already in use.');
       user.email = dto.email;
     }

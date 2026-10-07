@@ -8,6 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/require-permissions.decorator';
 import { RbacService } from '../rbac.service';
 import { JwtPayload } from '../../auth/strategies/jwt.strategy';
+import { CurrentUserGetRequest } from '../../auth/decorators/current-user.decorator';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -24,12 +25,14 @@ export class PermissionsGuard implements CanActivate {
 
     if (!required || required.length === 0) return true;
 
-    const request = ctx.switchToHttp().getRequest();
+    const request = ctx.switchToHttp().getRequest<CurrentUserGetRequest>();
     const user: JwtPayload = request.user;
 
     if (!user?.roles) throw new ForbiddenException();
 
-    const userPermissions = await this.rbacService.fetchPermissionsForRoles(user.roles);
+    const userPermissions = await this.rbacService.fetchPermissionsForRoles(
+      user.roles,
+    );
     request.userPermissions = userPermissions;
 
     const resourceOwnerId: number | undefined = request.resourceOwnerId;

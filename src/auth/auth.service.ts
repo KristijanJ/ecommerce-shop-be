@@ -41,23 +41,22 @@ export class AuthService {
 
     const hashed = await bcrypt.hash(dto.password, SALT_ROUNDS);
 
-    let user;
     try {
-      user = await this.userService.createUser({
+      const user = await this.userService.createUser({
         email: dto.email,
         password: hashed,
         firstName: dto.firstName,
         lastName: dto.lastName,
         role: dto.role,
       });
+
+      return { token: this.signToken(user) };
     } catch (err) {
       if (err instanceof Error && err.message === 'user_with_email_exists') {
         throw new BadRequestException('A user with this email already exists.');
       }
       throw err;
     }
-
-    return { token: this.signToken(user) };
   }
 
   async updateProfile(userId: number, dto: UpdateProfileDto) {
@@ -65,7 +64,13 @@ export class AuthService {
     return { token: this.signToken(updated) };
   }
 
-  signToken(user: { id: number; email: string; firstName: string; lastName: string; roles: string[] }) {
+  signToken(user: {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    roles: string[];
+  }) {
     const payload: JwtPayload = {
       id: user.id,
       email: user.email,
