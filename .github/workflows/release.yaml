@@ -18,7 +18,7 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -31,7 +31,7 @@ jobs:
 
   build:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       tag: ${{ steps.meta.outputs.tag }}
     steps:
@@ -53,12 +53,12 @@ jobs:
 
   bump-gitops:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/create-github-app-token@v3
         id: app
         with:
-          app-id: ${{ vars.GITOPS_APP_ID }}
+          client-id: ${{ vars.GITOPS_APP_CLIENT_ID }}
           private-key: ${{ secrets.GITOPS_APP_KEY }}
           repositories: ecommerce-shop-gitops
       - uses: actions/checkout@v7

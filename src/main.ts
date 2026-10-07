@@ -8,7 +8,8 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 const config = new DocumentBuilder()
   .setTitle('Ecommerce API')
-  .setVersion('1.0')
+  .setDescription('Deployed by GitHub Actions and ArgoCD')
+  .setVersion('1.1')
   .addBearerAuth()
   .build();
 
