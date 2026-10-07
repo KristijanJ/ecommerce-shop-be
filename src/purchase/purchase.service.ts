@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,8 +12,10 @@ import { CreatePurchaseDto, PurchaseItemDto } from './dto/create-purchase.dto';
 @Injectable()
 export class PurchaseService {
   constructor(
-    @InjectRepository(Purchase) private readonly purchaseRepo: Repository<Purchase>,
-    @InjectRepository(Product) private readonly productRepo: Repository<Product>,
+    @InjectRepository(Purchase)
+    private readonly purchaseRepo: Repository<Purchase>,
+    @InjectRepository(Product)
+    private readonly productRepo: Repository<Product>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -56,7 +57,12 @@ export class PurchaseService {
         orders: {
           id: true,
           status: true,
-          orderItems: { id: true, productId: true, quantity: true, priceAtPurchase: true },
+          orderItems: {
+            id: true,
+            productId: true,
+            quantity: true,
+            priceAtPurchase: true,
+          },
         },
       },
     });
@@ -73,7 +79,9 @@ export class PurchaseService {
     });
 
     if (products.length !== productIds.length) {
-      throw new BadRequestException('One or more products were not found or are inactive.');
+      throw new BadRequestException(
+        'One or more products were not found or are inactive.',
+      );
     }
 
     const productMap = new Map(products.map((p) => [p.id, p]));
@@ -81,7 +89,9 @@ export class PurchaseService {
     for (const item of dto.items) {
       const product = productMap.get(item.productId)!;
       if (product.stock < item.quantity) {
-        throw new BadRequestException(`Insufficient stock for product ${item.productId}.`);
+        throw new BadRequestException(
+          `Insufficient stock for product ${item.productId}.`,
+        );
       }
     }
 
@@ -93,7 +103,9 @@ export class PurchaseService {
     }
 
     const totalAmount = dto.items.reduce((sum, item) => {
-      const priceInCents = Math.round(productMap.get(item.productId)!.price * 100);
+      const priceInCents = Math.round(
+        productMap.get(item.productId)!.price * 100,
+      );
       return sum + priceInCents * item.quantity;
     }, 0);
 
@@ -104,21 +116,29 @@ export class PurchaseService {
         purchaseRepo.create({
           buyerId,
           amount: totalAmount,
-          orders: Array.from(itemsBySeller.entries()).map(([sellerId, sellerItems]) => ({
-            buyerId,
-            sellerId,
-            orderItems: sellerItems.map((item) => ({
-              productId: item.productId,
-              quantity: item.quantity,
-              priceAtPurchase: Math.round(productMap.get(item.productId)!.price * 100),
-            })),
-          })),
+          orders: Array.from(itemsBySeller.entries()).map(
+            ([sellerId, sellerItems]) => ({
+              buyerId,
+              sellerId,
+              orderItems: sellerItems.map((item) => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                priceAtPurchase: Math.round(
+                  productMap.get(item.productId)!.price * 100,
+                ),
+              })),
+            }),
+          ),
         }),
       );
 
       const productRepo = tx.getRepository(Product);
       for (const item of dto.items) {
-        await productRepo.decrement({ id: item.productId }, 'stock', item.quantity);
+        await productRepo.decrement(
+          { id: item.productId },
+          'stock',
+          item.quantity,
+        );
       }
 
       return purchase;

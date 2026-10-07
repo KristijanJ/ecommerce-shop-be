@@ -13,8 +13,10 @@ import { Order, OrderStatus } from '../purchase/entities/order.entity';
 @Injectable()
 export class PaymentService {
   constructor(
-    @InjectRepository(Payment) private readonly paymentRepo: Repository<Payment>,
-    @InjectRepository(Purchase) private readonly purchaseRepo: Repository<Purchase>,
+    @InjectRepository(Payment)
+    private readonly paymentRepo: Repository<Payment>,
+    @InjectRepository(Purchase)
+    private readonly purchaseRepo: Repository<Purchase>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -27,7 +29,9 @@ export class PaymentService {
     if (!purchase) throw new NotFoundException('Purchase not found.');
     if (purchase.buyerId !== buyerId) throw new ForbiddenException();
     if (purchase.status !== PurchaseStatus.PENDING) {
-      throw new BadRequestException(`Purchase is already ${purchase.status.toLowerCase()}.`);
+      throw new BadRequestException(
+        `Purchase is already ${purchase.status.toLowerCase()}.`,
+      );
     }
 
     return this.dataSource.transaction(async (tx) => {
@@ -39,8 +43,12 @@ export class PaymentService {
         }),
       );
 
-      await tx.getRepository(Purchase).update(purchaseId, { status: PurchaseStatus.PAID });
-      await tx.getRepository(Order).update({ purchaseId }, { status: OrderStatus.CONFIRMED });
+      await tx
+        .getRepository(Purchase)
+        .update(purchaseId, { status: PurchaseStatus.PAID });
+      await tx
+        .getRepository(Order)
+        .update({ purchaseId }, { status: OrderStatus.CONFIRMED });
 
       return payment;
     });

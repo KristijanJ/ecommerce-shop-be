@@ -38,7 +38,12 @@ describe('ProductController', () => {
 
       const result = await controller.findAll();
 
-      expect(mockProductService.findAll).toHaveBeenCalledWith(undefined, undefined);
+      expect(mockProductService.findAll).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+      );
       expect(result).toEqual(mockProducts);
     });
 
@@ -47,7 +52,12 @@ describe('ProductController', () => {
 
       await controller.findAll('1', 'Product A');
 
-      expect(mockProductService.findAll).toHaveBeenCalledWith(1, 'Product A');
+      expect(mockProductService.findAll).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+        1,
+        'Product A',
+      );
     });
 
     it('ignores non-numeric category query param', async () => {
@@ -55,7 +65,12 @@ describe('ProductController', () => {
 
       await controller.findAll('abc');
 
-      expect(mockProductService.findAll).toHaveBeenCalledWith(undefined, undefined);
+      expect(mockProductService.findAll).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+      );
     });
   });
 });

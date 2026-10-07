@@ -5,8 +5,12 @@ import { PermissionsGuard } from '../../rbac/guards/permissions.guard';
 export const jwtGuardMock = { canActivate: jest.fn(() => true) };
 export const permissionsGuardMock = { canActivate: jest.fn(() => true) };
 
-export function mockGuards(builder: TestingModuleBuilder): TestingModuleBuilder {
+export function mockGuards(
+  builder: TestingModuleBuilder,
+): TestingModuleBuilder {
   return builder
-    .overrideGuard(JwtAuthGuard).useValue(jwtGuardMock)
-    .overrideGuard(PermissionsGuard).useValue(permissionsGuardMock);
+    .overrideGuard(JwtAuthGuard)
+    .useValue(jwtGuardMock)
+    .overrideGuard(PermissionsGuard)
+    .useValue(permissionsGuardMock);
 }
