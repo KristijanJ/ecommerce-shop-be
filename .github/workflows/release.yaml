@@ -3,6 +3,9 @@ name: release
 on:
   push:
     branches: [main]
+    # a docs-only merge does not need a new image
+    paths-ignore:
+      - '**.md'
 
 permissions:
   contents: read
@@ -71,9 +74,37 @@ jobs:
         run: |
           yq -i '(.images[] | select(.name == strenv(IMAGE))).newTag = strenv(TAG)' "$GITOPS_KUSTOMIZATION"
           git diff
+      - name: Open a pull request in the gitops repo
+        env:
+          # the App token, so the pull request starts the validate workflow
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          TAG: ${{ needs.build.outputs.tag }}
+          BRANCH: bump/backend-homelab
+        run: |
+          # Nothing to do if the overlay already has this tag, for example on a re-run
+          if git diff --quiet; then
+            echo "The overlay already has tag $TAG"
+            exit 0
+          fi
+
+          TITLE="backend: homelab -> $TAG"
+          BODY="Image built from $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -am "backend: homelab -> $TAG"
-          # the frontend workflow pushes to the same repo, so rebase if it got there first
-          git pull --rebase origin main
-          git push origin HEAD:main
+          git switch -c "$BRANCH"
+          git commit -am "$TITLE"
+
+          # One branch per service. A newer build replaces one that is still open.
+          git push --force origin "$BRANCH"
+
+          open_prs=$(gh pr list --repo "$GITOPS_REPO" --head "$BRANCH" --state open --json number --jq 'length')
+          if [ "$open_prs" -eq 0 ]; then
+            gh pr create --repo "$GITOPS_REPO" --base main --head "$BRANCH" --title "$TITLE" --body "$BODY"
+          else
+            gh pr edit "$BRANCH" --repo "$GITOPS_REPO" --title "$TITLE" --body "$BODY"
+          fi
+
+          # Merge when the checks pass. If the pull request can already be merged, merge it now.
+          gh pr merge "$BRANCH" --repo "$GITOPS_REPO" --auto --squash \
+            || gh pr merge "$BRANCH" --repo "$GITOPS_REPO" --squash
