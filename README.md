@@ -72,17 +72,18 @@ Then:
 
 ```bash
 cp .env.example .env    # fill in DB_USER, DB_PASS, DB_DATABASE and JWT_SECRET
-npm install
-npm run start:dev       # hot reload on port 3000
+corepack enable        # once, pnpm's version is pinned in package.json
+pnpm install
+pnpm start:dev          # hot reload on port 3000
 ```
 
 ### Database
 
 ```bash
-npm run migration:generate -- src/database/migrations/<name>   # generate a migration
-npm run migration:run                                          # apply pending migrations
-npm run migration:revert                                       # revert the last migration
-npm run db:seed                                                # roles, permissions, users, products
+pnpm migration:generate src/database/migrations/<name>   # generate a migration
+pnpm migration:run                                       # apply pending migrations
+pnpm migration:revert                                    # revert the last migration
+pnpm db:seed                                             # roles, permissions, users, products
 ```
 
 `db:seed` runs the TypeScript source with ts-node, so it works only from a checkout. Inside a container the compiled build has the same script:
@@ -96,12 +97,12 @@ In the clusters, a Job runs `npm run migration:run:prod` before each rollout (se
 ### Scripts
 
 ```bash
-npm run build       # compile to dist/
-npm run start:prod  # run the compiled build
-npm run lint        # eslint with --fix
-npm run lint:ci     # eslint without --fix, used by CI
-npm test            # unit tests
-npm run test:e2e    # needs a running database
+pnpm build       # compile to dist/
+pnpm start:prod  # run the compiled build
+pnpm lint        # eslint with --fix
+pnpm lint:ci     # eslint without --fix, used by CI
+pnpm test        # unit tests
+pnpm test:e2e    # needs a running database
 ```
 
 ---
@@ -166,7 +167,7 @@ docker run -p 3000:3000 \
 
 A push to `main` runs `.github/workflows/release.yaml`. A push that changes only `.md` files does not. The workflow has three jobs:
 
-1. `test` runs `npm ci`, `npm run lint:ci` and `npm test`.
+1. `test` runs `pnpm install --frozen-lockfile`, `pnpm run lint:ci` and `pnpm test`.
 2. `build` builds the image and pushes it to Docker Hub as `kristijan92/ecommerce-shop-be:<first 7 characters of the commit SHA>`.
 3. `bump-gitops` sets `newTag` in `apps/backend/envs/homelab/kustomization.yaml` in the gitops repo with `yq`. It pushes the change to the branch `bump/backend-homelab`, opens a pull request and turns on auto-merge.
 

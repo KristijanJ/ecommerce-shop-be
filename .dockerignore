@@ -59,6 +59,8 @@ k8s
 kubernetes
 *.yaml
 *.yml
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
 
 # Misc
 .editorconfig

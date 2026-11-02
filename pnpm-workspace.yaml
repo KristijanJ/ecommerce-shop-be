@@ -1,0 +1,11 @@
+allowBuilds:
+  '@nestjs/core': false
+  '@scarf/scarf': false
+  bcrypt: true
+  esbuild: false
+  protobufjs: false
+  unrs-resolver: false
+permissions:
+  dotenv:
+    build: false
+    skills: false

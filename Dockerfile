@@ -1,26 +1,30 @@
 # Build stage
-FROM node:22-alpine AS builder
+FROM node:24.22.2-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
+RUN corepack enable
 
-RUN npm ci
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN npm run build
+RUN pnpm run build
 
 # Production stage
-FROM node:22-alpine
+FROM node:24.22.2-alpine
 
 WORKDIR /app
 
+RUN corepack enable
+
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-RUN npm ci --omit=dev && npm cache clean --force
+RUN pnpm install --frozen-lockfile --prod
 
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 
